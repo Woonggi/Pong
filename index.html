@@ -3,16 +3,78 @@
 <head>
     <meta charset="utf-8">
     <title>Pong</title>
+    <style>
+        canvas {
+            position: absolute;
+            margin : auto;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+    </style>
 </head>
 <body>
 <script>
 
 var WIDTH = 700, HEIGHT = 600, pi = Math.PI;
-var KEY_UP = 38,KEY_DOWN = 40; 
+var KEY_UP = 38,KEY_DOWN = 40, SPACE = 32;
 var canvas, ctx, keystate;
-var player, ai, ball;
+var left_player, right_player, ball, game;
 
-player = {
+const states = {
+    IDLE: 'IDLE',
+    START: 'START',
+    LEFT: 'LEFT',
+    RIGHT: 'RIGHT',
+    ON_GAME: 'ON_GAME',
+    GAME_SET: 'GAME_SET'
+};
+
+game = {
+    state: states.IDLE,
+    left_score : 0,
+    right_score : 0,
+    end_score: 10,
+
+    state_manager: function() {
+        switch(this.state) {
+            case states.START:
+                if(ball.x < WIDTH / 2) {
+                    ball.vel.x = ball.speed;
+                }
+                else {
+                    ball.vel.x = -ball.speed;
+                }
+                this.state = states.ON_GAME;
+                break;
+            case states.IDLE:
+                ball.vel.x = 0;
+                ball.vel.y = 0;
+                break;
+            case states.LEFT:
+                ball.x = left_player.x + (left_player.width + 10);
+                ball.y = left_player.y + (left_player.height - ball.side) / 2;
+                break;
+            case states.RIGHT:
+                ball.x = right_player.x - (right_player.width + 10);
+                ball.y = right_player.y + (right_player.height - ball.side) / 2;
+                break;
+            default:
+        }
+    },
+
+    update: function() {
+        this.state_manager();
+        if(keystate[SPACE]) {
+            game.state = states.START;
+        }
+    },
+
+
+};
+
+left_player = {
     x: null,
     y: null,
     width: 20,
@@ -30,7 +92,7 @@ player = {
     }
 }
 
-ai = {
+right_player = {
     x: null,
     y: null,
     width: 20,
@@ -49,15 +111,42 @@ ball = {
     vel: null,
     side: 20,
     speed: 5,
+    move : false,
 
     update: function() {
+        // update ball's position
         this.x += this.vel.x;
         this.y += this.vel.y;
 
-        if(0 > this.y || this.y + this.side > HEIGHT) {
-            var offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
-            this.y += offset;
-            this.vel.y *= -1;
+        // case left wins
+        if(this.x <= 0) {
+            game.state = states.LEFT;
+        }
+
+        // case right wins
+        if(this.x > WIDTH) {
+            game.state = states.RIGHT;
+        }
+
+        // proceed physics only if game is on going
+        if (game.state === states.ON_GAME) {
+            if (0 > this.y || this.y + this.side > HEIGHT) {
+                var offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
+                this.y += offset;
+                this.vel.y *= -1;
+            }
+            var AABBIntersection = function (ax, ay, aw, ah, bx, by, bw, bh) {
+                return ax < bx + bw && ay < by + bh && bx < ax + aw && bh < ay + ah;
+            }
+            
+            var paddle = this.vel.x < 0 ? left_player : right_player;
+            if (AABBIntersection(paddle.x, paddle.y, paddle.width, paddle.height, this.x, this.y, this.side, this.side)) {
+                this.x = paddle === left_player ? left_player.x + left_player.width : right_player.x - this.side;
+                var n = (this.y + this.side - paddle.y) / (paddle.height + this.side);
+                var phi = 0.25 * pi * (2 * n - 1);
+                this.vel.x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
+                this.vel.y = this.speed * Math.sin(phi);
+            }
         }
     },
     draw: function() {
@@ -66,12 +155,14 @@ ball = {
 }
 
 function main() {
+    // html setup
     canvas = document.createElement("canvas");
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     ctx = canvas.getContext("2d");
     document.body.appendChild(canvas);
 
+    // keyboard input setup
     keystate = {};
     document.addEventListener("keydown", function(evt) {
         keystate[evt.keyCode] = true;
@@ -91,24 +182,25 @@ function main() {
 }
 
 function init() {
-    player.x = player.width;
-    player.y = (HEIGHT - player.height) / 2;
+    left_player.x = left_player.width;
+    left_player.y = (HEIGHT - left_player.height) / 2;
 
-    ai.x = WIDTH - (player.width + ai.width);
-    ai.y = (HEIGHT - ai.height) / 2;
+    right_player.x = WIDTH - (left_player.width + right_player.width);
+    right_player.y = (HEIGHT - right_player.height) / 2;
 
     ball.x = (WIDTH - ball.side) / 2;
     ball.y = (HEIGHT - ball.side) / 2;
     ball.vel = {
-        x: 0,
-        y: ball.speed
+        x: ball.speed,
+        y: 0  
     };
 }
 
 function update() {
+    game.update();
     ball.update();
-    player.update();
-    ai.update();
+    left_player.update();
+    right_player.update();
 }
 
 function draw() {
@@ -117,8 +209,8 @@ function draw() {
     ctx.fillStyle = "#fff"
 
     ball.draw();
-    player.draw();
-    ai.draw();
+    left_player.draw();
+    right_player.draw();
 
     var w = 4;
     var x = (WIDTH - w) * 0.5;
