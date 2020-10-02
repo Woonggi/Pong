@@ -18,7 +18,7 @@
 <script>
 
 var WIDTH = 700, HEIGHT = 600, pi = Math.PI;
-var KEY_UP = 38,KEY_DOWN = 40, SPACE = 32;
+var KEY_UP = 38,KEY_DOWN = 40, SPACE = 32, W = 87, S = 83;
 var canvas, ctx, keystate;
 var left_player, right_player, ball, game;
 
@@ -60,13 +60,15 @@ game = {
                 ball.x = right_player.x - (right_player.width + 10);
                 ball.y = right_player.y + (right_player.height - ball.side) / 2;
                 break;
+            case states.ON_GAME:
+                break;
             default:
         }
     },
 
     update: function() {
         this.state_manager();
-        if(keystate[SPACE]) {
+        if(keystate[SPACE] && game.state != states.ON_GAME) {
             game.state = states.START;
         }
     },
@@ -79,11 +81,12 @@ left_player = {
     y: null,
     width: 20,
     height: 100,
+    name : "left",
     update: function() {
-        if(keystate[KEY_UP]) {
+        if(keystate[W]) {
             this.y -= 7;
         }
-        if(keystate[KEY_DOWN]) {
+        if(keystate[S]) {
             this.y += 7;
         }
     },
@@ -97,8 +100,14 @@ right_player = {
     y: null,
     width: 20,
     height: 100,
+    name: "right",
     update: function() {
-
+        if(keystate[KEY_UP]) {
+            this.y -= 7;
+        }
+        if(keystate[KEY_DOWN]) {
+            this.y += 7;
+        }
     },
     draw: function() {
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -114,10 +123,6 @@ ball = {
     move : false,
 
     update: function() {
-        // update ball's position
-        this.x += this.vel.x;
-        this.y += this.vel.y;
-
         // case left wins
         if(this.x <= 0) {
             game.state = states.LEFT;
@@ -128,15 +133,20 @@ ball = {
             game.state = states.RIGHT;
         }
 
+
+        // update ball's position
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+
         // proceed physics only if game is on going
         if (game.state === states.ON_GAME) {
             if (0 > this.y || this.y + this.side > HEIGHT) {
                 var offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
-                this.y += offset;
+                this.y += 2 * offset;
                 this.vel.y *= -1;
             }
             var AABBIntersection = function (ax, ay, aw, ah, bx, by, bw, bh) {
-                return ax < bx + bw && ay < by + bh && bx < ax + aw && bh < ay + ah;
+                return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
             }
             
             var paddle = this.vel.x < 0 ? left_player : right_player;
@@ -146,6 +156,7 @@ ball = {
                 var phi = 0.25 * pi * (2 * n - 1);
                 this.vel.x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
                 this.vel.y = this.speed * Math.sin(phi);
+                console.log(this.x, this.y);
             }
         }
     },
