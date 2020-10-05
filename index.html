@@ -15,12 +15,15 @@
     </style>
 </head>
 <body>
+<script src="/socket.io/socket.io.js"></script>
 <script>
-
 var WIDTH = 700, HEIGHT = 600, pi = Math.PI;
 var KEY_UP = 38,KEY_DOWN = 40, SPACE = 32, W = 87, S = 83;
 var canvas, ctx, keystate;
 var left_player, right_player, ball, game;
+var socket = io();
+
+var start = false;
 
 const states = {
     IDLE: 'IDLE',
@@ -123,14 +126,16 @@ ball = {
     move : false,
 
     update: function() {
-        // case left wins
+        // case right wins
         if(this.x <= 0) {
             game.state = states.LEFT;
+            socket.emit('SCORED', "Right player wins");
         }
 
-        // case right wins
+        // case left wins
         if(this.x > WIDTH) {
             game.state = states.RIGHT;
+            socket.emit('SCORED', "Left player wins");
         }
 
 
@@ -156,7 +161,7 @@ ball = {
                 var phi = 0.25 * pi * (2 * n - 1);
                 this.vel.x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
                 this.vel.y = this.speed * Math.sin(phi);
-                console.log(this.x, this.y);
+                socket.emit('collision', "Collided!");
             }
         }
     },
@@ -208,10 +213,12 @@ function init() {
 }
 
 function update() {
-    game.update();
-    ball.update();
-    left_player.update();
-    right_player.update();
+    if (start == true) {
+        game.update();
+        ball.update();
+        left_player.update();
+        right_player.update();
+    }
 }
 
 function draw() {
@@ -236,9 +243,24 @@ function draw() {
     ctx.restore();
 }
 
+socket.on('SCORED', function(msg) {
+    console.log(msg);
+});
+
+socket.on('GAME START', function(msg) {
+    start = true;
+    console.log(msg);
+});
+
+socket.on('USR DISCONNECTED', function(msg) {
+    start = false;
+    console.log(msg);
+})
+
 main();
 
 </script>
 </body>
+
 
 </html>
