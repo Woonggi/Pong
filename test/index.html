@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meat charset="utf-8"></meat>
+    <title>Pong</title>
+    <style>
+        canvas {
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    const socket = io(); 
+    const WIDTH = 700, HEIGHT = 600, pi = Math.PI;
+    const UP = 38, DOWN = 40;
+    
+    var canvas, ctx, keystate;
+    var player, ball;
+
+    $('body').on('keydown', function(e) {
+        socket.emit('keydown', e.keyCode);
+    });
+
+    $('body').on('keyup', function(e){
+        socket.emit('keyup', e.keyCode);
+    });
+
+    player = {
+        x: null,
+        y: null,
+        width: 20, 
+        height: 100,
+        update: function() {
+
+        },
+        draw: function() {
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    };
+
+    ball = {
+        x: null,
+        y: null,
+        vel: null,
+        side: 20,
+        speed: 5,
+        update: function () {
+            // case right wins
+            if (this.x <= 0) {
+            }
+
+            // case left wins
+            if (this.x > WIDTH) {
+            }
+
+
+            // update ball's position
+            this.x += this.vel.x;
+            this.y += this.vel.y;
+
+            // proceed physics only if game is on going
+            if (0 > this.y || this.y + this.side > HEIGHT) {
+                var offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
+                this.y += 2 * offset;
+                this.vel.y *= -1;
+            }
+
+            var AABBIntersection = function (ax, ay, aw, ah, bx, by, bw, bh) {
+                return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
+            }
+
+            /*var paddle = this.vel.x < 0 ? left_player : right_player;
+            if (AABBIntersection(paddle.x, paddle.y, paddle.width, paddle.height, this.x, this.y, this.side, this.side)) {
+                this.x = paddle === left_player ? left_player.x + left_player.width : right_player.x - this.side;
+                var n = (this.y + this.side - paddle.y) / (paddle.height + this.side);
+                var phi = 0.25 * pi * (2 * n - 1);
+                this.vel.x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
+                this.vel.y = this.speed * Math.sin(phi);
+            }*/
+        },
+
+        draw: function() {
+            ctx.fillRect(this.x, this.y, this.side, this.side);
+        }
+    };
+
+    function main() {
+        canvas = document.createElement("canvas");
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+        ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+
+        init();
+
+        var loop = function() {
+            update();
+            draw();
+            window.requestAnimationFrame(loop, canvas);
+        }
+        window.requestAnimationFrame(loop, canvas);
+    }
+
+    function init() {
+        player.x = player.width;
+        player.y = (HEIGHT - player.height) / 2;
+
+        ball.x = (WIDTH - ball.side) / 2;
+        ball.y = (HEIGHT - ball.side) / 2;
+        ball.vel = {
+            x: ball.speed,
+            y: 0
+        };
+    }
+    
+    function update() {
+        ball.update();
+        player.update();
+    }
+
+    function draw() {
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.save();
+        ctx.fillStyle = "#fff";
+
+        ball.draw();
+        player.draw();
+
+        var mid_width = 4;
+        var x = (WIDTH - mid_width) * 0.5;
+        var y = 0;
+        var step = HEIGHT / 20;
+
+        // draw half line
+        while (y < HEIGHT) {
+            ctx.fillRect(x, y + step * 0.25, mid_width, step * 0.5);
+            y += step;
+        }
+
+        ctx.restore();
+    }
+
+    main();
+
+    socket.on('update', function(ids, status){
+        for(id of ids) {
+            player.x = status[id].x;
+            player.y = status[id].y;
+        }
+    });
+
+    socket.on('create', function(id){
+        client_id = id;
+        console.log(client_id);
+    });
+
+
+</script>
+
+</body>
+
+
+</html>
