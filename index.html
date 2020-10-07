@@ -16,14 +16,25 @@
 </head>
 <body>
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-var WIDTH = 700, HEIGHT = 600, pi = Math.PI;
-var KEY_UP = 38,KEY_DOWN = 40, SPACE = 32, W = 87, S = 83;
+
+
+const WIDTH = 700, HEIGHT = 600, pi = Math.PI;
+const KEY_UP = 38,KEY_DOWN = 40, SPACE = 32, W = 87, S = 83;
 var canvas, ctx, keystate;
 var left_player, right_player, ball, game;
 var socket = io();
+var start = true;
 
-var start = false;
+
+$('body').on('keydown', function(e) {
+    socket.emit('keydown', e.keyCode);
+});
+
+$('body').on('keyup', function(e) {
+    socket.emit('keyup', e.keyCode)
+})
 
 const states = {
     IDLE: 'IDLE',
@@ -86,12 +97,6 @@ left_player = {
     height: 100,
     name : "left",
     update: function() {
-        if(keystate[W]) {
-            this.y -= 7;
-        }
-        if(keystate[S]) {
-            this.y += 7;
-        }
     },
     draw: function() {
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -213,34 +218,36 @@ function init() {
 }
 
 function update() {
-    if (start == true) {
+    //if (start == true) {
         game.update();
         ball.update();
         left_player.update();
         right_player.update();
-    }
+    //}
 }
 
 function draw() {
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.save();
-    ctx.fillStyle = "#fff"
+    //if(start == true){
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.save();
+        ctx.fillStyle = "#fff"
 
-    ball.draw();
-    left_player.draw();
-    right_player.draw();
+        ball.draw();
+        left_player.draw();
+        right_player.draw();
 
-    var w = 4;
-    var x = (WIDTH - w) * 0.5;
-    var y = 0;
-    var step = HEIGHT / 20;
+        var w = 4;
+        var x = (WIDTH - w) * 0.5;
+        var y = 0;
+        var step = HEIGHT / 20;
 
-    while(y < HEIGHT) {
-        ctx.fillRect(x, y + step * 0.25, w, step * 0.5);
-        y += step;
-    }
+        while (y < HEIGHT) {
+            ctx.fillRect(x, y + step * 0.25, w, step * 0.5);
+            y += step;
+        }
 
-    ctx.restore();
+        ctx.restore();
+    //}
 }
 
 socket.on('SCORED', function(msg) {
