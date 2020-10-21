@@ -20,12 +20,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     const socket = io(); 
-    const WIDTH = 700, HEIGHT = 600, pi = Math.PI;
+    let WIDTH = 700, HEIGHT = 600, pi = Math.PI;
     const UP = 38, DOWN = 40;
     
     let canvas, ctx, keystate;
     let ball;
 
+    // send key code to server.
     $('body').on('keydown', (e) => {
         socket.emit('keydown', e.keyCode);
     });
@@ -58,37 +59,6 @@
         side: 20,
         speed: 5,
         update: function () {
-            // case right wins
-            if (this.x <= 0) {
-            }
-
-            // case left wins
-            if (this.x > WIDTH) {
-            }
-
-            // update ball's position
-            this.x += this.vel.x;
-            this.y += this.vel.y;
-
-            // proceed physics only if game is on going
-            if (0 > this.y || this.y + this.side > HEIGHT) {
-                var offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
-                this.y += 2 * offset;
-                this.vel.y *= -1;
-            }
-
-            var AABBIntersection = (ax, ay, aw, ah, bx, by, bw, bh) => {
-                return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
-            }
-
-            /*var paddle = this.vel.x < 0 ? left_player : right_player;
-            if (AABBIntersection(paddle.x, paddle.y, paddle.width, paddle.height, this.x, this.y, this.side, this.side)) {
-                this.x = paddle === left_player ? left_player.x + left_player.width : right_player.x - this.side;
-                var n = (this.y + this.side - paddle.y) / (paddle.height + this.side);
-                var phi = 0.25 * pi * (2 * n - 1);
-                this.vel.x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
-                this.vel.y = this.speed * Math.sin(phi);
-            }*/
         },
 
         draw: function() {
@@ -114,9 +84,6 @@
     }
 
     function init() {
-        //player.x = player.width;
-        //player.y = (HEIGHT - player.height) / 2;
-
         ball.x = (WIDTH - ball.side) / 2;
         ball.y = (HEIGHT - ball.side) / 2;
         ball.vel = {
@@ -126,7 +93,7 @@
     }
     
     function update() {
-        ball.update();
+        //ball.update();
         for(p in players) {
             players[p].update();
         }
@@ -152,29 +119,33 @@
             ctx.fillRect(x, y + step * 0.25, mid_width, step * 0.5);
             y += step;
         }
-
         ctx.restore();
     }
 
     main();
 
-    socket.on('update', (ids, status) => {
+    socket.on('setup', (setup) => {
+        WIDTH = setup.width;
+        HEIGHT = setup.height;
+    })
+
+    // update game info
+    socket.on('update', (ids, player_status, ball_status) => {
         players = [];
         for (id of ids) {
-            console.log(id);
-            if(players[id] == undefined || players[id] == null) {
-                players[id] = new player(status[id].x, status[id].y);
+            if(players[id] == null || players[id] == undefined) { 
+                players[id] = new player(player_status[id].player_x, player_status[id].player_y);
             }
             else {
-                players[id].x = status[id].x;
-                players[id].y = status[id].y;
+                players[id].x = player_status[id].player_x;
+                players[id].y = player_status[id].player_y;
             }
         }
+        ball.x = ball_status.x
+        ball.y = ball_status.y
+        console.log(ball.x, ball.y);
     });
 
 </script>
-
 </body>
-
-
 </html>
