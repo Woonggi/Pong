@@ -18,11 +18,11 @@ const setups = {
 }
 
 const game_state = {
-    ST_IDLE : 0,
-    ST_ONGAME : 1
+    ST_IDLE : "ST_IDLE",
+    ST_ONGAME : "ST_ONGAME" 
 }
 
-let curr_state = 0;
+let curr_state = game_state.ST_IDLE; 
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -33,12 +33,14 @@ io.on('connection', (socket) => {
     if(num_player == 1) {
         players[socket.id]  = new player(20, 280, num_player);
         player1_id = socket.id;
+        console.log(player1_id);
         ball = new ball_obj(setups.width/ 2, setups.height/ 2);
         console.log(num_player + "P")
         num_player++;
     }
     else if(num_player == 2) {
         player2_id = socket.id;
+        console.log(player2_id);
         players[socket.id] = new player(660, 280, num_player);
     }
 
@@ -69,11 +71,10 @@ var update = setInterval(() => {
     let ids = [];
     for(var id in io.sockets.clients().connected) {
         if(players[id].keypress[UP]) {
-            console.log('UP');
-            players[id].to_trans.player_y -= 7;
+            players[id].to_trans.y-= 7;
         }
         if(players[id].keypress[DOWN]) {
-            players[id].to_trans.player_y += 7;
+            players[id].to_trans.y+= 7;
         }
         if(players[id].keypress[SPACE] && 
             curr_state == game_state.ST_IDLE && num_player == 2) {
@@ -84,7 +85,8 @@ var update = setInterval(() => {
         status[id] = players[id].to_trans;
     }
     if (curr_state == game_state.ST_ONGAME) {
-        ball.update(players[player1_id], players[player2_id]);
+        ball.update(players[player1_id], players[player2_id], curr_state);
+        console.log(curr_state);
     }
     io.emit('update', ids, status, ball.to_trans);
 }, 30);

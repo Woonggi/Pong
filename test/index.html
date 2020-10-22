@@ -134,16 +134,16 @@
         players = [];
         for (id of ids) {
             if(players[id] == null || players[id] == undefined) { 
-                players[id] = new player(player_status[id].player_x, player_status[id].player_y);
+                players[id] = new player(player_status[id].x, player_status[id].y);
             }
             else {
-                players[id].x = player_status[id].player_x;
-                players[id].y = player_status[id].player_y;
+                players[id].x = player_status[id].x;
+                players[id].y = player_status[id].y;
             }
         }
         ball.x = ball_status.x
         ball.y = ball_status.y
-        console.log(ball.x, ball.y);
+        //console.log(ball.x, ball.y);
     });
 
 </script>

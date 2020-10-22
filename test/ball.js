@@ -4,35 +4,49 @@ module.exports = class ball{
         this.to_trans.x = xpos;
         this.to_trans.y = ypos;
         this.speed = 5;
-        this.vel_x = 0;//this.speed;
-        this.vel_y = this.speed;
+        this.vel_x = this.speed;//this.speed;
+        this.vel_y = 0;//this.speed;
 
         // For testing, it is hard-coded now.
         this.side = 20;
     }
 
-    update(left_player, right_player) {
-        this.to_trans.x += this.vel_x;
-        this.to_trans.y += this.vel_y;
+
+    update(left_player, right_player, curr_state) {
+        let pi = Math.PI;
 
         // HARD-CODED
         const WIDTH = 700;
         const HEIGHT = 600;
 
-        // proceed physics only if game is on going
-        if (0 > this.to_trans.y || this.to_trans.y + this.side > HEIGHT) {
-            var offset = this.vel_y < 0 ? 0 - this.vel_y : HEIGHT - (this.vel_y + this.side);
-            this.to_trans.y += 2 * offset;
-            this.vel_y *= -1;
+        // score condition
+        if(this.to_trans.x  <= 0) {
+            curr_state = "ST_IDLE"
+            this.to_trans.x = left_player.width + 5;
+            this.to_trans.y = left_player.to_trans.y;
+            right_player.to_trans.points++;
+            console.log(left_player.to_trans.points + " : " + right_player.to_trans.points);
+        }
+        if (this.to_trans.x > WIDTH) {
+            curr_state = "ST_IDLE"
+            this.to_trans.x = right_player.width - 5;
+            this.to_trans.y = right_player.to_trans.y;
+            left_player.to_trans.points++;
+            console.log(left_player.to_trans.points + " : " + right_player.to_trans.points);
         }
 
-        if(this.to_trans.y < 0 || this.to_trans.y + this.side > HEIGHT) {
-            //var offset = this.vel_y < 0 ? 0 - this.to_trans.y : HEIGHT - (this.to_trans.y + this.side);
-            //this.to_trans.y += 2 * offset;
-            this.vel_y *= -1;
-            console.log('check');
+        if(curr_state == "ST_ONGAME") {
+            this.to_trans.x += this.vel_x;
+            this.to_trans.y += this.vel_y;
         }
-        //console.log(this.vel_y);
+
+        // proceed physics only if game is on going
+        if(this.to_trans.y < 0 || this.to_trans.y + this.side > HEIGHT) {
+            var offset = this.vel_y < 0 ? 0 - this.to_trans.y : HEIGHT - (this.to_trans.y + this.side);
+            this.to_trans.y += 2 * offset;
+            this.vel_y *= -1;
+            console.log(this.vel_y);
+        }
 
         var AABBIntersection = (ax, ay, aw, ah, bx, by, bw, bh) => {
             return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
@@ -40,13 +54,11 @@ module.exports = class ball{
 
         var paddle = this.vel_x < 0 ? left_player : right_player;
         if (AABBIntersection(paddle.to_trans.x, paddle.to_trans.y, paddle.width, paddle.height, this.to_trans.x, this.to_trans.y, this.side, this.side)) {
-            this.x = paddle === left_player ? left_player.to_trans.x + left_player.width : right_player.to_trans.x - this.side;
+            this.to_trans.x = paddle === left_player ? left_player.to_trans.x + left_player.width : right_player.to_trans.x - this.side;
             var n = (this.to_trans.y + this.side - paddle.to_trans.y) / (paddle.height + this.side);
             var phi = 0.25 * pi * (2 * n - 1);
             this.vel_x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
             this.vel_y = this.speed * Math.sin(phi);
-            console.log('check');
         }
-        //console.log(this.vel_x);
     }
 };
