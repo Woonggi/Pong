@@ -86,7 +86,6 @@ var update = setInterval(() => {
     }
     if (curr_state == game_state.ST_ONGAME) {
         ball.update(players[player1_id], players[player2_id], curr_state);
-        console.log(curr_state);
     }
     io.emit('update', ids, status, ball.to_trans);
 }, 30);

@@ -35,10 +35,8 @@ module.exports = class ball{
             console.log(left_player.to_trans.points + " : " + right_player.to_trans.points);
         }
 
-        if(curr_state == "ST_ONGAME") {
-            this.to_trans.x += this.vel_x;
-            this.to_trans.y += this.vel_y;
-        }
+        this.to_trans.x += this.vel_x;
+        this.to_trans.y += this.vel_y;
 
         // proceed physics only if game is on going
         if(this.to_trans.y < 0 || this.to_trans.y + this.side > HEIGHT) {
