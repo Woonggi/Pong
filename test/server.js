@@ -73,7 +73,7 @@ var update = setInterval(() => {
             players[id].to_trans.y+= 7;
         }
         if(players[id].keypress[SPACE] && 
-            curr_state === "ST_IDLE" && num_player == 2) {
+            curr_state != "ST_ONGAME" && num_player == 2) {
             ball.vel_x = ball.speed;
             curr_state = "ST_ONGAME";
         }
@@ -81,8 +81,7 @@ var update = setInterval(() => {
         ids.push(id);
         status[id] = players[id].to_trans;
     }
-    ball.update(players[player1_id], players[player2_id], curr_state);
-   
+    curr_state = ball.update(players[player1_id], players[player2_id], curr_state);
     io.emit('update', ids, status, ball.to_trans);
 }, 30);
 

@@ -22,15 +22,14 @@ module.exports = class ball{
             this.vel_y = 0;    
         }
         else if(curr_state === "ST_LEFTBALL") {
-            this.to_trans.x = left_player.width + 5;
+            this.to_trans.x = (left_player.width * 2) + 5;
             this.to_trans.y = left_player.to_trans.y + left_player.height / 2;
             this.vel_x = 0;    
             this.vel_y = 0;    
         }
         else if (curr_state === "ST_RIGHTBALL") {
-            this.to_trans.x = WIDTH - right_player.width - 5;
+            this.to_trans.x = WIDTH - (right_player.width * 2) - 15;
             this.to_trans.y = right_player.to_trans.y + right_player.height / 2;
-            console.log(this.to_trans.x, this.to_trans.y);
             this.vel_x = 0;    
             this.vel_y = 0;    
         }
@@ -68,6 +67,6 @@ module.exports = class ball{
                 this.vel_y = this.speed * Math.sin(phi);
             }
         }
-        //console.log(curr_state);
+        return curr_state
     }
 };
