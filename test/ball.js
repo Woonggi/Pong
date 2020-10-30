@@ -17,19 +17,23 @@ module.exports = class ball{
         const WIDTH = 700;
         const HEIGHT = 600;
 
+        const reset_offset = 5;
+
         if(curr_state === "ST_IDLE") {
             this.vel_x = 0;    
             this.vel_y = 0;    
         }
         else if(curr_state === "ST_LEFTBALL") {
-            this.to_trans.x = (left_player.width * 2) + 5;
-            this.to_trans.y = left_player.to_trans.y + left_player.height / 2;
+            this.to_trans.x = (left_player.width * 2) + reset_offset;
+            this.to_trans.y = left_player.to_trans.y + (left_player.height / 2) - (this.side / 2);
+            this.speed = 5;
             this.vel_x = 0;    
             this.vel_y = 0;    
         }
         else if (curr_state === "ST_RIGHTBALL") {
-            this.to_trans.x = WIDTH - (right_player.width * 2) - 15;
-            this.to_trans.y = right_player.to_trans.y + right_player.height / 2;
+            this.to_trans.x = WIDTH - (right_player.width * 2) - this.side - reset_offset;
+            this.to_trans.y = right_player.to_trans.y + (right_player.height / 2) - (this.side / 2);
+            this.speed = -5;
             this.vel_x = 0;    
             this.vel_y = 0;    
         }
@@ -58,13 +62,14 @@ module.exports = class ball{
                 return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
             }
 
-            var paddle = this.vel_x < 0 ? left_player : right_player;
+            let paddle = this.vel_x < 0 ? left_player : right_player;
             if (AABBIntersection(paddle.to_trans.x, paddle.to_trans.y, paddle.width, paddle.height, this.to_trans.x, this.to_trans.y, this.side, this.side)) {
                 this.to_trans.x = paddle === left_player ? left_player.to_trans.x + left_player.width : right_player.to_trans.x - this.side;
-                var n = (this.to_trans.y + this.side - paddle.to_trans.y) / (paddle.height + this.side);
-                var phi = 0.25 * pi * (2 * n - 1);
-                this.vel_x = (paddle === left_player ? 1 : -1) * this.speed * Math.cos(phi);
-                this.vel_y = this.speed * Math.sin(phi);
+                let n = (this.to_trans.y + this.side - paddle.to_trans.y) / (paddle.height + this.side);
+                let phi = 0.25 * pi * (2 * n - 1);
+                let abs_speed = this.speed < 0 ? this.speed * -1 : this.speed;
+                this.vel_x = (paddle === left_player ? 1 : -1) * abs_speed* Math.cos(phi);
+                this.vel_y = abs_speed * Math.sin(phi);
             }
         }
         return curr_state

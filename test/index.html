@@ -25,6 +25,7 @@
     
     let canvas, ctx, keystate;
     let ball;
+    let win_text = "";
 
     // send key code to server.
     $('body').on('keydown', (e) => {
@@ -119,6 +120,10 @@
             ctx.fillRect(x, y + step * 0.25, mid_width, step * 0.5);
             y += step;
         }
+
+        ctx.font = "30px Arial";
+        ctx.fillText(win_text, 10, 100);
+
         ctx.restore();
     }
 
@@ -128,6 +133,9 @@
         WIDTH = setup.width;
         HEIGHT = setup.height;
     })
+    socket.on('game_over', (win_msg) => {
+        win_text = win_msg;
+    }) 
 
     // update game info
     socket.on('update', (ids, player_status, ball_status) => {

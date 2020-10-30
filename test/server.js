@@ -7,10 +7,11 @@ const ball_obj = require('./ball.js')
 
 const setups = {
     width : 700,
-    height: 600
+    height: 600,
+    end_score: 3 
 }
 
-const game_state = ["ST_IDLE", "ST_ONGAME", "ST_LEFTBALL", "ST_RIGHTBALL"]
+const game_state = ["ST_IDLE", "ST_READY", "ST_ONGAME", "ST_LEFTBALL", "ST_RIGHTBALL"]
 
 let curr_state = game_state[0]; 
 let players = {};
@@ -35,6 +36,7 @@ io.on('connection', (socket) => {
         num_player++;
     }
     else if(num_player == 2) {
+        curr_state = "ST_READY";
         player2_id = socket.id;
         console.log(player2_id);
         players[socket.id] = new player(setups.width - 40, (setups.height - 100) / 2, num_player);
@@ -63,26 +65,40 @@ io.on('connection', (socket) => {
 const UP = 38, DOWN = 40, SPACE = 32;
 var update = setInterval(() => {
     // check if players are connected or disconnceted 'all the time'.
-    let status = {};
-    let ids = [];
-    for(var id in io.sockets.clients().connected) {
-        if(players[id].keypress[UP]) {
-            players[id].to_trans.y-= 7;
+    if (curr_state != "ST_IDLE") {
+        let status = {};
+        let ids = [];
+        let start_player_id = player1_id;
+        if (curr_state === "ST_RIGHTBALL") {
+            start_player_id = player2_id;
         }
-        if(players[id].keypress[DOWN]) {
-            players[id].to_trans.y+= 7;
+        for (var id in io.sockets.clients().connected) {
+            if (players[id].keypress[UP]) {
+                players[id].to_trans.y -= 7;
+            }
+            if (players[id].keypress[DOWN]) {
+                players[id].to_trans.y += 7;
+            }
+            if (players[start_player_id].keypress[SPACE] &&
+                curr_state != "ST_ONGAME" && num_player == 2) {
+                ball.vel_x = ball.speed;
+                curr_state = "ST_ONGAME";
+            }
+
+            ids.push(id);
+            status[id] = players[id].to_trans;
         }
-        if(players[id].keypress[SPACE] && 
-            curr_state != "ST_ONGAME" && num_player == 2) {
-            ball.vel_x = ball.speed;
-            curr_state = "ST_ONGAME";
+        if (players[player1_id].to_trans.points == setups.end_score
+            || players[player2_id].to_trans.points == setups.end_score) {
+            let winner = curr_state === "ST_RIGHTBALL" ? player1_id : player2_id;
+            curr_state = "ST_GAMEOVER";
+            let winning_text = winner + ' Won!';
+            io.emit('game_over', winning_text)
         }
 
-        ids.push(id);
-        status[id] = players[id].to_trans;
+        curr_state = ball.update(players[player1_id], players[player2_id], curr_state);
+        io.emit('update', ids, status, ball.to_trans);
     }
-    curr_state = ball.update(players[player1_id], players[player2_id], curr_state);
-    io.emit('update', ids, status, ball.to_trans);
 }, 30);
 
 const port = 3000;
