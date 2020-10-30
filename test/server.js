@@ -23,7 +23,7 @@ let num_player = 1;
 
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/client.html');
 });
 
 io.on('connection', (socket) => {
