@@ -5,21 +5,21 @@ const io = require('socket.io')(http);
 const player = require('./player.js');
 const ball_obj = require('./ball.js')
 
-const setups = {
-    width : 700,
-    height: 600,
-    end_score: 3 
-}
+const config = {
+    screen_width,
+    screen_height,
+    player_width,
+    player_height,
+    end_point
+} = require('./config.json');
 
-const game_state = ["ST_IDLE", "ST_READY", "ST_ONGAME", "ST_LEFTBALL", "ST_RIGHTBALL"]
+const game_state = ["ST_IDLE", "ST_DISCONNECTED", "ST_READY", "ST_ONGAME", "ST_LEFTBALL", "ST_RIGHTBALL"]
 
 let curr_state = game_state[0]; 
 let players = {};
-let ball = new ball_obj((setups.width - 20) / 2, (setups.height - 20) / 2);
+let ball = {}; 
 let player1_id, player2_id;
-let num_player = 1;
-
-// TODO: server send clients respect to setup parameters
+let num_player = 0;
 
 
 app.get('/', (req, res) => {
@@ -27,27 +27,40 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    io.emit('setup', setups)
-    if(num_player == 1) {
-        players[socket.id]  = new player(20, (setups.height - 100)/ 2, num_player);
+    io.emit('config', config);
+    io.emit('text_update', "Waiting for other player...");
+    if(player1_id == null) {
+        players[socket.id]  = new player(config.player_width, (config.screen_height - config.player_height)/ 2, num_player);
         player1_id = socket.id;
         console.log(player1_id);
-        console.log(num_player + "P")
-        num_player++;
     }
-    else if(num_player == 2) {
-        curr_state = "ST_READY";
+    else if(player2_id == null) {
         player2_id = socket.id;
         console.log(player2_id);
-        players[socket.id] = new player(setups.width - 40, (setups.height - 100) / 2, num_player);
+        players[socket.id] = new player(config.screen_width - config.player_width * 2, (config.screen_height - config.player_height) / 2, num_player);
+    }
+    num_player++;
+    if(num_player >= 2) {
+        io.emit('text_update', "");
+        curr_state = "ST_READY"
+        ball = new ball_obj((config.screen_width - config.player_width) / 2, (config.screen_height - config.player_width) / 2);
     }
 
     console.log('user connected', socket.id, num_player);
+    console.log('num player : ', num_player);
     socket.on('disconnect', () => {
-        if(players[socket.id].player_num == 1){
-            num_player--;
+        curr_state = "ST_IDLE";
+        io.emit('config', config);
+        io.emit('text_update', "Waiting for other player...")
+        if(player1_id == socket.id) {
+            player1_id = null;
+        } 
+        else {
+            player2_id = null;
         }
+        num_player--;
         delete players[socket.id];
+        delete ball;
         io.emit('disconnect', socket.id);
         console.log('user disconnected', socket.id);
     });
@@ -65,7 +78,7 @@ io.on('connection', (socket) => {
 const UP = 38, DOWN = 40, SPACE = 32;
 var update = setInterval(() => {
     // check if players are connected or disconnceted 'all the time'.
-    if (curr_state != "ST_IDLE") {
+    if (curr_state != "ST_IDLE" && player1_id != null && player2_id != null) {
         let status = {};
         let ids = [];
         let start_player_id = player1_id;
@@ -88,11 +101,11 @@ var update = setInterval(() => {
             ids.push(id);
             status[id] = players[id].to_trans;
         }
-        if (players[player1_id].to_trans.points == setups.end_score
-            || players[player2_id].to_trans.points == setups.end_score) {
+        if (players[player1_id].to_trans.points == config.end_point
+            || players[player2_id].to_trans.points == config.end_point) {
             let winner = curr_state === "ST_RIGHTBALL" ? player1_id : player2_id;
-            curr_state = "ST_GAMEOVER";
             let winning_text = winner + ' Won!';
+            curr_state = "ST_GAMEOVER";
             io.emit('game_over', winning_text)
         }
 

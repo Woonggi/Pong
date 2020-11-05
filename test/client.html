@@ -20,12 +20,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     const socket = io(); 
-    let WIDTH = 700, HEIGHT = 600, pi = Math.PI;
+    let  width = 0, height = 0, player_width = 0, player_height;
+    const pi = Math.PI;
     const UP = 38, DOWN = 40;
     
     let canvas, ctx, keystate;
     let ball;
-    let win_text = "";
+    let text = "";
 
     // send key code to server.
     $('body').on('keydown', (e) => {
@@ -41,11 +42,15 @@
         constructor (xpos = 0, ypos = 0) {
             this.x = xpos;
             this.y = ypos;
-            this.width = 20
-            this.height = 100;
+            this.width = 0 
+            this.height = 0;
         }
+        init() {
+        }
+
         update() {
-            // console.log('player update');
+            this.width = player_width;
+            this.height = player_height;
         }
 
         draw() {
@@ -57,9 +62,10 @@
         x: null,
         y: null,
         vel: null,
-        side: 20,
-        speed: 5,
+        side: 0,
+        speed: 8,
         update: function () {
+            // this.side = player_width;
         },
 
         draw: function() {
@@ -67,26 +73,11 @@
         }
     };
 
-    function main() {
-        canvas = document.createElement("canvas");
-        canvas.width = WIDTH;
-        canvas.height = HEIGHT;
-        ctx = canvas.getContext("2d");
-        document.body.appendChild(canvas);
-
-        init();
-
-        var loop = function() {
-            update();
-            draw();
-            window.requestAnimationFrame(loop, canvas);
-        }
-        window.requestAnimationFrame(loop, canvas);
-    }
-
     function init() {
-        ball.x = (WIDTH - ball.side) / 2;
-        ball.y = (HEIGHT - ball.side) / 2;
+        ball.side = player_width;
+        ball.x = (width - ball.side) / 2;
+        ball.y = (height - ball.side) / 2;
+        console.log(player_width);
         ball.vel = {
             x: ball.speed,
             y: 0
@@ -94,47 +85,68 @@
     }
     
     function update() {
-        //ball.update();
+        ball.update();
         for(p in players) {
             players[p].update();
         }
     }
 
     function draw() {
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillRect(0, 0, width, height);
         ctx.save();
         ctx.fillStyle = "#fff";
 
         for(p in players){
             players[p].draw();
         }
+
         ball.draw();
 
         var mid_width = 4;
-        var x = (WIDTH - mid_width) * 0.5;
+        var x = (width - mid_width) * 0.5;
         var y = 0;
-        var step = HEIGHT / 20;
+        var step = height / 20;
 
         // draw half line
-        while (y < HEIGHT) {
+        while (y < height) {
             ctx.fillRect(x, y + step * 0.25, mid_width, step * 0.5);
             y += step;
         }
 
         ctx.font = "30px Arial";
-        ctx.fillText(win_text, 10, 100);
-
+        ctx.fillText(text, 10, 100);
         ctx.restore();
     }
 
+    function main() {
+        canvas = document.createElement("canvas");
+        ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+
+        var loop = function() {
+            canvas.width = width;
+            canvas.height = height;
+            update();
+            draw();
+            window.requestAnimationFrame(loop, canvas);
+        }
+        window.requestAnimationFrame(loop, canvas);
+    }
+
+
     main();
 
-    socket.on('setup', (setup) => {
-        WIDTH = setup.width;
-        HEIGHT = setup.height;
+    socket.on('config', (config) => {
+        width         = config.screen_width;
+        height        = config.screen_height;
+        player_width  = config.player_width;
+        player_height = config.player_height;
+        end_point     = config.end_point;
+        init();
     })
-    socket.on('game_over', (win_msg) => {
-        win_text = win_msg;
+
+    socket.on('text_update', (text_update) => {
+        text = text_update;
     }) 
 
     // update game info
