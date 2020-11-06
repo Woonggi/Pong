@@ -1,5 +1,5 @@
 module.exports = class player{
-    constructor(xpos, ypos, num) {
+    constructor(id, xpos = 0, ypos = 0) {
         this.to_trans = {};
         this.to_trans.x = xpos;
         this.to_trans.y = ypos;
@@ -9,8 +9,11 @@ module.exports = class player{
         this.width = 20;
         this.height = 100
         
-        this.player_num  = num;
+        this.id = id;
+        // temp
+        this.state = "PLAYER_WAITING";
         this.keypress = [];
     }
+
 };
 
