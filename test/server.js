@@ -10,6 +10,10 @@ let lobby        = new Lobby();
 let room_manager = new RoomManager(io);
 
 app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/lobby.html');
+});
+
+app.get('/client', (req, res) => {
     res.sendFile(__dirname + '/client.html');
 });
 
@@ -32,7 +36,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         curr_state = "ST_IDLE";
-        //let room = room_manager.find_room(socket.id);
+        let room = room_manager.find_room(socket.id);
         room_manager.destroy(room);
     });
 
