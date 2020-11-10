@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
     console.log("----------------------------------")
     console.log(lobby.players);
     console.log("\nnum players:", lobby.get_num_player());
-    console.log("---------------------------------")
+    console.log("----------------------------------")
 
     if(lobby.get_num_player() % 2 == 0) {
         let player1 = lobby.players.shift();
