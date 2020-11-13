@@ -145,8 +145,20 @@
         init();
     })
 
-    socket.on('text_update', (text_update) => {
+    socket.on('game_over', (text_update) => {
         text = text_update;
+        // 1. Create the button
+        var leave_button = document.createElement("button");
+        leave_button.innerHTML = "Go Back To Menu";
+
+        // 2. Append somewhere
+        var body = document.getElementsByTagName("body")[0];
+        body.appendChild(leave_button);
+
+        // 3. Add event handler
+        leave_button.addEventListener("click", function () {
+            window.location.href = '/';
+        });
     }) 
 
     // update game info

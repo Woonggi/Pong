@@ -5,7 +5,6 @@ const io           = require('socket.io')(http);
 const Lobby        = require('./lobby.js')
 const RoomManager  = require('./room_manager.js')
 
-
 let lobby        = new Lobby();
 let room_manager = new RoomManager(io);
 
@@ -18,9 +17,6 @@ app.get('/client', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    //io.emit('config', config);
-    //io.emit('text_update', "Waiting for other player...");
-
     lobby.add_player(socket.id);
     console.log("----------------------------------")
     console.log(lobby.players);
@@ -37,7 +33,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         curr_state = "ST_IDLE";
         let room = room_manager.find_room(socket.id);
-        room_manager.destroy(room);
+        room.disconnect(socket.id);
     });
 
     socket.on('keydown', (keycode) => {
@@ -57,10 +53,8 @@ io.on('connection', (socket) => {
             }
         }
     });
-
 });
 
-const UP = 38, DOWN = 40, SPACE = 32;
 var update = setInterval(() => {
     if(room_manager.num_rooms > 0) {
         room_manager.update();

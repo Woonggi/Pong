@@ -20,8 +20,8 @@ module.exports = class room {
         this.id = id1 + id2;
         this.io = io;
 
+        this.disconnected = null;
         this.players = [];
-        //this.start_player = this.player1;
         this.players.push(this.player1);
         this.players.push(this.player2);
     }
@@ -32,6 +32,7 @@ module.exports = class room {
     update() {
         let status = {};
         let ids = [];
+        // Determine player to start.
         let start_player = this.player1;
         if(this.curr_state === "ST_RIGHTBALL") {
             start_player = this.player2;
@@ -57,13 +58,21 @@ module.exports = class room {
             let winner = this.curr_state === "ST_RIGHTBALL" ? this.player1.id : this.player2.id;
             let winning_text = winner + ' Won!';
             this.curr_state = "ST_GAMEOVER";
-            this.io.to(this.player1.id).emit('text_update', winning_text);
-            this.io.to(this.player2.id).emit('text_update', winning_text);
+            this.io.to(this.player1.id).emit('game_over', winning_text);
+            this.io.to(this.player2.id).emit('game_over', winning_text);
         }
 
         this.curr_state = this.ball.update(this.player1, this.player2, this.curr_state);
         this.io.to(this.player1.id).emit('update', ids, status, this.ball.to_trans);
         this.io.to(this.player2.id).emit('update', ids, status, this.ball.to_trans);
+    }
+    
+    disconnect(id) {
+        this.disconnected = id;
+        this.curr_state = "ST_DISCONNECTED"
+        let connected_id = (id === this.player1.id) ? this.player2.id : this.player1.id;
+        let msg = this.disconnected + " has left the game";
+        this.io.to(connected_id).emit('game_over', msg);
     }
 
     print_room() {
