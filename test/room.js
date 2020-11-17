@@ -12,15 +12,14 @@ const game_state = ["ST_IDLE", "ST_DISCONNECTED", "ST_ONGAME", "ST_LEFTBALL", "S
 const UP = 38, DOWN = 40, SPACE = 32;
 
 module.exports = class room {
-    constructor(id1, id2, io) {
-        this.player1 = new Player(id1, config.player_width, (config.screen_height - config.player_height)/ 2);
-        this.player2 = new Player(id2, config.screen_width - config.player_width * 2, (config.screen_height - config.player_height) / 2);
+    constructor(p1, p2, io) {
+        this.player1 = new Player(p1, config.player_width, (config.screen_height - config.player_height)/ 2);
+        this.player2 = new Player(p2, config.screen_width - config.player_width * 2, (config.screen_height - config.player_height) / 2);
         this.ball    = new Ball((config.screen_width - config.player_width) / 2, (config.screen_height - config.player_width) / 2);
         this.curr_state = "ST_IDLE";
-        this.id = id1 + id2;
+        this.id = p1.id + p2.id;
         this.io = io;
 
-        this.disconnected = null;
         this.players = [];
         this.players.push(this.player1);
         this.players.push(this.player2);
@@ -68,18 +67,18 @@ module.exports = class room {
     }
     
     disconnect(id) {
-        this.disconnected = id;
         this.curr_state = "ST_DISCONNECTED"
+        let disconnected_user = (id === this.player1.id) ? this.player1.username : this.player2.username;
         let connected_id = (id === this.player1.id) ? this.player2.id : this.player1.id;
-        let msg = this.disconnected + " has left the game";
+        let msg = disconnected_user + " has left the game";
         this.io.to(connected_id).emit('game_over', msg);
     }
 
     print_room() {
         console.log("----------------------------------")
         console.log("Room ID: " + this.id);
-        console.log("player 1:", this.player1.id);
-        console.log("player 2:", this.player2.id);
+        console.log("player 1: " + this.player1.username + "(" + this.player1.id + ")");
+        console.log("player 2: " + this.player2.username + "(" + this.player2.id + ")");
         console.log("----------------------------------")
     }
 }

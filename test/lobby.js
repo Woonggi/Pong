@@ -6,9 +6,13 @@ module.exports = class lobby {
         this.room_manager = new RoomManager();
     }
 
-    add_player(id) {
-        this.players.push(id);
-        console.log(id + " has joined to lobby");
+    add_player(id, username) {
+        let player = {
+            id: id,
+            username: username
+        }
+        this.players.push(player);
+        console.log(username + " has joined");
     }
 
     remove_player(id) {

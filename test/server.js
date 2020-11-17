@@ -12,18 +12,21 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/lobby.html');
 });
 
-app.get('/client', (req, res) => {
-    res.sendFile(__dirname + '/client.html');
+let username = ""
+app.get('/public/:username/', (req, res) => {
+    res.sendFile(__dirname + '/game.html');
+    username = req.params.username;
 });
 
 io.on('connection', (socket) => {
-    lobby.add_player(socket.id);
+    lobby.add_player(socket.id, username);
+    username = "";
     console.log("----------------------------------")
     console.log(lobby.players);
     console.log("\nnum players:", lobby.get_num_player());
     console.log("----------------------------------")
 
-    if(lobby.get_num_player() % 2 == 0) {
+    if (lobby.get_num_player() % 2 == 0) {
         let player1 = lobby.players.shift();
         let player2 = lobby.players.shift();
         room_manager.create_room(player1, player2);
@@ -31,15 +34,14 @@ io.on('connection', (socket) => {
     }
 
     socket.on('disconnect', () => {
-        curr_state = "ST_IDLE";
-        let room = room_manager.find_room(socket.id);
+        const room = room_manager.find_room(socket.id);
         room.disconnect(socket.id);
     });
 
     socket.on('keydown', (keycode) => {
         if (room_manager.num_rooms > 0) {
             let user = room_manager.find_user(socket.id);
-            if(user != null) {
+            if (user != null) {
                 room_manager.find_user(socket.id).keypress[keycode] = true;
             }
         }
@@ -48,12 +50,13 @@ io.on('connection', (socket) => {
     socket.on('keyup', (keycode) => {
         if (room_manager.num_rooms > 0) {
             let user = room_manager.find_user(socket.id);
-            if(user != null) {
+            if (user != null) {
                 room_manager.find_user(socket.id).keypress[keycode] = false;
             }
         }
     });
 });
+
 
 var update = setInterval(() => {
     if(room_manager.num_rooms > 0) {

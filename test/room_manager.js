@@ -6,8 +6,8 @@ module.exports = class room_manager {
         this.io = io;
     }
 
-    create_room(id1, id2) {
-        let to_add = new Room(id1, id2, this.io);
+    create_room(p1, p2) {
+        let to_add = new Room(p1, p2, this.io);
         to_add.init();
         this.rooms[to_add.id] = to_add;
         this.num_rooms++;

@@ -7,6 +7,9 @@
         .center-contents {
             text-align: center;
         }
+        .username_input {
+            padding-bottom: 15px;
+        }
         h1 {
             font-size: 100px;
             padding-top: 50px;
@@ -16,11 +19,24 @@
 </head>
 </html>
 <body>
+    <script>
+        function join_public() {
+            let username = document.getElementById("username").value;
+            window.location.href= 'public/' + username;
+        }
+        
+        function join_private() {
+            let username = document.getElementById("username").value;
+            window.location.href= 'private/' + username;
+        }
+    </script>
+
     <div class="center-contents">
         <h1>Pong</h1>
-        <button onclick="window.location.href='client';">Join Public Game</button>
-        <button onclick="window.location.href='client';">Join Private Game</button>
+        <div class="username_input">
+            <input class="inputbox" id="username" name="username" type="text" placeholder="username">
+        </div>
+        <button onclick="join_public();">Join Public Game</button>
+        <button onclick="join_private();">Join Private Game</button>
     </div>
-    <script>
-    </script>
 </body>
