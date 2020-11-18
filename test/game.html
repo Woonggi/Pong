@@ -27,6 +27,7 @@
     let canvas, ctx, keystate;
     let ball;
     let text = "";
+    let score1 = 0, score2 = 0;
 
     // send key code to server.
     $('body').on('keydown', (e) => {
@@ -114,6 +115,9 @@
 
         ctx.font = "30px Arial";
         ctx.fillText(text, 10, 100);
+        ctx.font = "50px Arial"
+        ctx.fillText(score1, width/4, height / 5)
+        ctx.fillText(score2, 3 * width / 4, height / 5)
         ctx.restore();
     }
 
@@ -159,6 +163,16 @@
             window.location.href = '/';
         });
     }) 
+
+    socket.on('score', (score_user) => {
+        console.log(score_user);
+        if(score_user == "ST_RIGHTBALL") {
+            score1 += 1;
+        }
+        else if(score_user == "ST_LEFTBALL") {
+            score2 += 1;
+        }
+    })
 
     // update game info
     socket.on('update', (ids, player_status, ball_status) => {

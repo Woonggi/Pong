@@ -3,7 +3,7 @@ module.exports = class player{
         this.to_trans = {};
         this.to_trans.x = xpos;
         this.to_trans.y = ypos;
-        this.to_trans.points = 0;
+        this.points = 0;
 
         this.username = info.username;
         this.id = info.id;

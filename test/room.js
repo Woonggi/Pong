@@ -44,7 +44,8 @@ module.exports = class room {
             if(player.keypress[DOWN]) {
                 player.to_trans.y += 7;
             }
-            if(start_player.keypress[SPACE] && this.curr_state != "ST_ONGAME") {
+            if(start_player.keypress[SPACE] && this.curr_state != "ST_ONGAME"
+               && this.curr_state != "ST_GAMEOVER") {
                 this.ball.vel_x = this.ball.speed;
                 this.curr_state = "ST_ONGAME"
             }
@@ -52,16 +53,17 @@ module.exports = class room {
             status[player.id] = player.to_trans;
         });
 
-        if(this.player1.to_trans.points == config.end_point
-        || this.player2.to_trans.points == config.end_point) {
-            let winner = this.curr_state === "ST_RIGHTBALL" ? this.player1.id : this.player2.id;
+        if((this.player1.points == config.end_point
+        || this.player2.points == config.end_point)
+        && this.curr_state != "ST_GAMEOVER") {
+            let winner = this.curr_state === "ST_RIGHTBALL" ? this.player1.username : this.player2.username;
             let winning_text = winner + ' Won!';
             this.curr_state = "ST_GAMEOVER";
             this.io.to(this.player1.id).emit('game_over', winning_text);
             this.io.to(this.player2.id).emit('game_over', winning_text);
         }
 
-        this.curr_state = this.ball.update(this.player1, this.player2, this.curr_state);
+        this.curr_state = this.ball.update(this.player1, this.player2, this.curr_state, this.io);
         this.io.to(this.player1.id).emit('update', ids, status, this.ball.to_trans);
         this.io.to(this.player2.id).emit('update', ids, status, this.ball.to_trans);
     }
