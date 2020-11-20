@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
     console.log("\nnum players:", lobby.get_num_player());
     console.log("----------------------------------")
 
-    if(lobby.private_matching(room_code) == true) {
+    if(room_code != "public" && lobby.private_matching(room_code) == true) {
         let player1 = lobby.private_players[room_code].shift();
         let player2 = lobby.private_players[room_code].shift();
         room_manager.create_room(player1, player2);
@@ -51,7 +51,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         // error: if there's only one user, crashes here since there's no room atm.
         const room = room_manager.find_room(socket.id);
-        room.disconnect(socket.id);
+        if(room != null) {
+            room.disconnect(socket.id);
+        }
     });
 
     socket.on('keydown', (keycode) => {
