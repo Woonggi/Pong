@@ -26,7 +26,7 @@
     
     let canvas, ctx, keystate;
     let ball;
-    let text = "";
+    let message = "";
     let score1 = 0, score2 = 0;
 
     // send key code to server.
@@ -114,7 +114,7 @@
         }
 
         ctx.font = "30px Arial";
-        ctx.fillText(text, 10, 100);
+        ctx.fillText(message, 10, 100);
         ctx.font = "50px Arial"
         ctx.fillText(score1, width/4, height / 5)
         ctx.fillText(score2, 3 * width / 4, height / 5)
@@ -148,8 +148,8 @@
         init();
     })
 
-    socket.on('game_over', (text_update) => {
-        text = text_update;
+    socket.on('game_over', (msg) => {
+        message = msg;
         // Create the button
         let leave_button = document.createElement("button");
         leave_button.innerHTML = "Go Back To Menu";
@@ -168,7 +168,7 @@
         console.log(score_user);
         if(score_user == "ST_RIGHTBALL") {
             score1 += 1;
-        }
+        } 
         else if(score_user == "ST_LEFTBALL") {
             score2 += 1;
         }
@@ -180,7 +180,7 @@
         for (id of ids) {
             if(players[id] == null || players[id] == undefined) { 
                 players[id] = new player(player_status[id].x, player_status[id].y);
-            }
+            } 
             else {
                 players[id].x = player_status[id].x;
                 players[id].y = player_status[id].y;

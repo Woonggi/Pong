@@ -12,21 +12,36 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/lobby.html');
 });
 
-let username = ""
+let username = "";
+let room_code = "public";
 app.get('/public/:username/', (req, res) => {
     res.sendFile(__dirname + '/game.html');
     username = req.params.username;
+    room_code = "public";
+});
+
+let room_codes = []; 
+app.get('/private/:room_code/:username', (req, res) => {
+    res.sendFile(__dirname + '/game.html')
+    username = req.params.username;
+    room_code = req.params.room_code;
 });
 
 io.on('connection', (socket) => {
-    lobby.add_player(socket.id, username);
+    lobby.add_player(socket.id, username, room_code);
     username = "";
+
     console.log("----------------------------------")
     console.log(lobby.players);
     console.log("\nnum players:", lobby.get_num_player());
     console.log("----------------------------------")
 
-    if (lobby.get_num_player() % 2 == 0) {
+    if(lobby.private_matching(room_code) == true) {
+        let player1 = lobby.private_players[room_code].shift();
+        let player2 = lobby.private_players[room_code].shift();
+        room_manager.create_room(player1, player2);
+    } 
+    else if(lobby.get_num_player() % 2 == 0 && room_code === "public") {
         let player1 = lobby.players.shift();
         let player2 = lobby.players.shift();
         room_manager.create_room(player1, player2);
@@ -34,6 +49,7 @@ io.on('connection', (socket) => {
     }
 
     socket.on('disconnect', () => {
+        // error: if there's only one user, crashes here since there's no room atm.
         const room = room_manager.find_room(socket.id);
         room.disconnect(socket.id);
     });

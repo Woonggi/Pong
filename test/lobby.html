@@ -22,12 +22,26 @@
     <script>
         function join_public() {
             let username = document.getElementById("username").value;
+            if(username == null || username == "") {
+                alert("Enter your username");
+                return;
+            }
             window.location.href= 'public/' + username;
         }
         
         function join_private() {
             let username = document.getElementById("username").value;
-            window.location.href= 'private/' + username;
+            if (username == null || username == "") {
+                alert("Enter your username")
+                return;
+            } 
+
+            let room_code = window.prompt("Enter the room code that shared with your friend", "");
+            if(room_code == null || room_code == "") {
+                alert("Room code is empty");
+                return;
+            } 
+            window.location.href= 'private/' + room_code + '/' + username;
         }
     </script>
 

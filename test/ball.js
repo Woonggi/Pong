@@ -22,22 +22,19 @@ module.exports = class ball{
         if(curr_state === "ST_IDLE") {
             this.vel_x = 0;    
             this.vel_y = 0;    
-        }
-        else if(curr_state === "ST_LEFTBALL") {
+        } else if(curr_state === "ST_LEFTBALL") {
             this.to_trans.x = (left_player.width * 2) + reset_offset;
             this.to_trans.y = left_player.to_trans.y + (left_player.height / 2) - (this.side / 2);
             this.speed = 10;
             this.vel_x = 0;    
             this.vel_y = 0;    
-        }
-        else if (curr_state === "ST_RIGHTBALL") {
+        } else if (curr_state === "ST_RIGHTBALL") {
             this.to_trans.x = WIDTH - (right_player.width * 2) - this.side - reset_offset;
             this.to_trans.y = right_player.to_trans.y + (right_player.height / 2) - (this.side / 2);
             this.speed = -10;
             this.vel_x = 0;    
             this.vel_y = 0;    
-        }
-        else if (curr_state === "ST_ONGAME") {
+        } else if (curr_state === "ST_ONGAME") {
             this.to_trans.x += this.vel_x;
             this.to_trans.y += this.vel_y;
             // score condition
