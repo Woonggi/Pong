@@ -40,10 +40,10 @@ module.exports = class room {
         }
 
         this.players.forEach(player => {
-            if(player.keypress[UP]) {
+            if(player.keypress[UP] && player.to_trans.y >= 0) {
                 player.to_trans.y -= 7;
             }
-            if(player.keypress[DOWN]) {
+            if(player.keypress[DOWN] && player_height + player.to_trans.y < config.screen_height) {
                 player.to_trans.y += 7;
             }
             if(start_player.keypress[SPACE] && this.curr_state != "ST_ONGAME"
