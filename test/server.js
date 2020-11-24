@@ -36,11 +36,13 @@ io.on('connection', (socket) => {
     console.log("\nnum players:", lobby.get_num_player());
     console.log("----------------------------------")
 
+    // Private game matching
     if(room_code != "public" && lobby.private_matching(room_code) == true) {
         let player1 = lobby.private_players[room_code].shift();
         let player2 = lobby.private_players[room_code].shift();
         room_manager.create_room(player1, player2);
     } 
+    // Public game matching
     else if(lobby.get_num_player() % 2 == 0 && room_code === "public") {
         let player1 = lobby.players.shift();
         let player2 = lobby.players.shift();

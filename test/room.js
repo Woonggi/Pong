@@ -25,6 +25,8 @@ module.exports = class room {
         this.players.push(this.player2);
     }
     init() {
+        let usernames = [this.player1.username, this.player2.username];
+        this.io.emit('usernames', usernames);
         this.io.emit('config', config);
     }
 
