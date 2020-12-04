@@ -12,8 +12,6 @@ module.exports = class player{
         // HARD-CODED
         this.width = 20;
         this.height = 100
-        
     }
-
 };
 

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meat charset="utf-8"></meat>
+    <title>Lobby</title>
+    <style>
+        .center-contents {
+            text-align: center;
+        }
+        .username_input {
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 100px;
+            padding-top: 50px;
+            padding-bottom: 50;
+        }
+    </style>
+</head>
+</html>
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io('/menu');
+        function join_public() {
+            let username = document.getElementById("username").value;
+            if(username == null || username == "") {
+                alert("Enter your username");
+                return;
+            }
+
+            socket.emit('join_public', username)
+            socket.on('public_validation', (validate, message) => {
+                console.log("Hello")
+                if (validate == 1) {
+                    window.location.href = 'public/' + username;
+                } else {
+                    alert(message);
+                }
+            });
+        }
+        function create_private() {
+            let username = document.getElementById("username").value;
+            if (username == null || username == "") {
+                alert("Enter your username")
+                return;
+            } 
+
+            let room_code = window.prompt("Enter the room code to create", "");
+            if(room_code == null || room_code == "") {
+                alert("Room code is empty");
+                return;
+            } 
+
+            socket.emit('create_private', username, room_code)
+            socket.on('create_validation', (validate, message) => {
+                if (validate == 1) {
+                    window.location.href = 'private/' + room_code + '/' + username;
+                } else {
+                    alert(message);
+                }
+            });
+        }
+        
+        function join_private() {
+            let username = document.getElementById("username").value;
+            if (username == null || username == "") {
+                alert("Enter your username")
+                return;
+            } 
+
+            let room_code = window.prompt("Enter the room code to join", "");
+            if(room_code == null || room_code == "") {
+                alert("Room code is empty");
+                return;
+            } 
+            socket.emit('join_private', username ,room_code);
+            socket.on('join_validation', (validate, message) => {
+                if (validate == true) {
+                    window.location.href = 'private/' + room_code + '/' + username;
+                } else {
+                    alert(message);
+                }
+            })
+        }
+
+
+    </script>
+
+    <div class="center-contents">
+        <h1>Pong</h1>
+        <div class="username_input">
+            <input class="inputbox" id="username" name="username" type="text" placeholder="username">
+        </div>
+        <button onclick="join_public();">Join Public Game</button>
+        <button onclick="create_private();">Create Private Game</button>
+        <button onclick="join_private();">Join Private Game</button>
+    </div>
+</body>

@@ -4,54 +4,101 @@ const http         = require('http').createServer(app);
 const io           = require('socket.io')(http);
 const Lobby        = require('./lobby.js')
 const RoomManager  = require('./room_manager.js')
+const token_builder = require('./token.js')
+//const session = require('express-session')
+//const shared_session = require('express-socket.io-session');
 
 let lobby        = new Lobby();
-let room_manager = new RoomManager(io);
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/lobby.html');
+    res.sendFile(__dirname + '/menu.html');
 });
 
-let username = "";
-let room_code = "public";
+let username = "default";
+let room_code = "";
 app.get('/public/:username/', (req, res) => {
     res.sendFile(__dirname + '/game.html');
+    console.log("GET PUBLIC")
     username = req.params.username;
     room_code = "public";
 });
 
-let room_codes = []; 
+let room_codes = {}; 
 app.get('/private/:room_code/:username', (req, res) => {
-    res.sendFile(__dirname + '/game.html')
+    res.sendFile(__dirname + '/game.html');
+    console.log("GET PRIVATE")
     username = req.params.username;
     room_code = req.params.room_code;
 });
 
-io.on('connection', (socket) => {
+let mode = "public"
+var menu_io = io.of('/menu')
+menu_io.on('connection', async(socket) => {
+    console.log(socket.id);
+    // here, the server validate user's login
+    let validate = 0;
+    let message = "";
+    let login = new Promise((resolve, reject) => {
+        socket.on('join_public', (username) => {
+            message = "public";
+            validate = 1;
+            socket.emit('public_validation', validate, message);
+        });
+
+        // create private
+        socket.on('create_private', (username, room_code) => {
+            if(room_codes[room_code] >= 1) {
+                message = room_code + " already exists!";
+                reject(message);
+            } else {
+                room_codes[room_code] = 1;
+                validate = 1;
+            }
+            socket.emit('create_validation', validate, message)
+        });
+        // join private
+        socket.on('join_private', (username, room_code) => {
+            let validate = 0; 
+            let message = "";
+            if (room_codes[room_code] == null) {
+                message = room_code + " does not exist!";
+                reject(message);
+            }
+            else if (room_codes[room_code] == 1) {
+                room_codes[room_code]++;
+                validate = 1;
+            } else if (room_codes[room_code] > 1) {
+                message = "Room is full!";
+                reject(message);
+            }
+            socket.emit('join_validation', validate, message);
+        })
+        resolve(message);
+    });
+
+    mode = await login;
+});
+
+var game_io = io.of('/game')
+let room_manager = new RoomManager(game_io);
+game_io.on('connection', (socket) => {
+    console.log(socket.id);
     lobby.add_player(socket.id, username, room_code);
-    username = "";
-
-    console.log("----------------------------------")
     console.log(lobby.players);
-    console.log("\nnum players:", lobby.get_num_player());
-    console.log("----------------------------------")
 
-    // Private game matching
-    if(room_code != "public" && lobby.private_matching(room_code) == true) {
-        let player1 = lobby.private_players[room_code].shift();
-        let player2 = lobby.private_players[room_code].shift();
-        room_manager.create_room(player1, player2);
-    } 
-    // Public game matching
-    else if(lobby.get_num_player() % 2 == 0 && room_code === "public") {
+    if(lobby.get_num_player() % 2 == 0 && lobby.get_num_player() > 0) {
         let player1 = lobby.players.shift();
         let player2 = lobby.players.shift();
         room_manager.create_room(player1, player2);
-        room_manager.print_all_rooms();
+        //room_manager.print_all_rooms();
+    }
+    if(lobby.get_num_private_players(room_code) == 2) {
+        let player1 = lobby.private_players[room_code].shift();
+        let player2 = lobby.private_players[room_code].shift();
+        room_manager.create_room(player1, player2);
     }
 
     socket.on('disconnect', () => {
-        // error: if there's only one user, crashes here since there's no room atm.
         const room = room_manager.find_room(socket.id);
         if(room != null) {
             room.disconnect(socket.id);
@@ -75,8 +122,7 @@ io.on('connection', (socket) => {
             }
         }
     });
-});
-
+})
 
 var update = setInterval(() => {
     if(room_manager.num_rooms > 0) {

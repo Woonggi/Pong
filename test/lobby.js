@@ -20,7 +20,6 @@ module.exports = class lobby {
                 this.private_players[room_code] = new Array();
             }
             this.private_players[room_code].push(player);
-            console.log(this.private_players[room_code]);
         }
     }
 
@@ -36,10 +35,7 @@ module.exports = class lobby {
         return this.players.length;
     }
 
-    private_matching(code) {
-        if (this.private_players[code].length == 2) {
-            return true;
-        } 
-        return false;
+    get_num_private_players(code) {
+        return this.private_players[code] == null ? 0 : this.private_players[code].length;
     }
 }

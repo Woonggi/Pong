@@ -19,7 +19,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    const socket = io(); 
+    const socket = io('/game'); 
     let  width = 0, height = 0, player_width = 0, player_height;
     const pi = Math.PI;
     const UP = 38, DOWN = 40;
@@ -29,7 +29,7 @@
     let message = "";
     let score1 = 0, score2 = 0;
     let username = [];
-
+    
     // send key code to server.
     $('body').on('keydown', (e) => {
         socket.emit('keydown', e.keyCode);
@@ -190,6 +190,7 @@
 
     // update game info
     socket.on('update', (ids, player_status, ball_status) => {
+        console.log('update');
         players = [];
         for (id of ids) {
             if(players[id] == null || players[id] == undefined) { 
