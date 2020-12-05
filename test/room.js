@@ -26,8 +26,10 @@ module.exports = class room {
     }
     init() {
         let usernames = [this.player1.username, this.player2.username];
-        this.io.emit('usernames', usernames);
-        this.io.emit('config', config);
+        this.io.to(this.player1.id).emit('usernames', usernames);
+        this.io.to(this.player2.id).emit('usernames', usernames)
+        this.io.to(this.player1.id).emit('config', config);
+        this.io.to(this.player2.id).emit('config', config);
     }
 
     update() {
@@ -76,6 +78,7 @@ module.exports = class room {
         let connected_id = (id === this.player1.id) ? this.player2.id : this.player1.id;
         let msg = disconnected_user + " has left the game";
         this.io.to(connected_id).emit('game_over', msg);
+        console.log(msg);
     }
 
     print_room() {

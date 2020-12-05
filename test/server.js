@@ -5,10 +5,7 @@ const io           = require('socket.io')(http);
 const Lobby        = require('./lobby.js')
 const RoomManager  = require('./room_manager.js')
 const token_builder = require('./token.js')
-//const session = require('express-session')
-//const shared_session = require('express-socket.io-session');
 
-let lobby        = new Lobby();
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/menu.html');
@@ -34,7 +31,7 @@ app.get('/private/:room_code/:username', (req, res) => {
 let mode = "public"
 var menu_io = io.of('/menu')
 menu_io.on('connection', async(socket) => {
-    console.log(socket.id);
+    console.log(socket.id + " joined menu");
     // here, the server validate user's login
     let validate = 0;
     let message = "";
@@ -54,6 +51,7 @@ menu_io.on('connection', async(socket) => {
                 room_codes[room_code] = 1;
                 validate = 1;
             }
+            console.log('EMIT!');
             socket.emit('create_validation', validate, message)
         });
         // join private
@@ -80,9 +78,10 @@ menu_io.on('connection', async(socket) => {
 });
 
 var game_io = io.of('/game')
+let lobby = new Lobby();
 let room_manager = new RoomManager(game_io);
 game_io.on('connection', (socket) => {
-    console.log(socket.id);
+    console.log(socket.id + " joined game");
     lobby.add_player(socket.id, username, room_code);
     console.log(lobby.players);
 
@@ -125,9 +124,7 @@ game_io.on('connection', (socket) => {
 })
 
 var update = setInterval(() => {
-    if(room_manager.num_rooms > 0) {
-        room_manager.update();
-    }
+    room_manager.update();
 }, 30);
 
 const port = 3000;

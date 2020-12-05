@@ -31,11 +31,11 @@
 
             socket.emit('join_public', username)
             socket.on('public_validation', (validate, message) => {
-                console.log("Hello")
                 if (validate == 1) {
                     window.location.href = 'public/' + username;
                 } else {
                     alert(message);
+                    return;
                 }
             });
         }
@@ -58,6 +58,7 @@
                     window.location.href = 'private/' + room_code + '/' + username;
                 } else {
                     alert(message);
+                    return;
                 }
             });
         }
@@ -80,10 +81,24 @@
                     window.location.href = 'private/' + room_code + '/' + username;
                 } else {
                     alert(message);
+                    return;
                 }
             })
         }
 
+        function mOver(obj) {
+            obj.style.fontSize = "30px";
+            obj.innerHTML =  " \
+            Developed by Woonggi Eun <br /><br />  \
+            ** DigiPen Institutue of Technology **<br /> \
+            President : Claude Comair<br /> \
+            Instructor: Matthew Picioccio<br /> \
+            "
+        }
+        function mOut(obj) {
+            obj.style.fontSize = "20px"
+            obj.innerHTML = "Credit"
+        }
 
     </script>
 
@@ -95,5 +110,7 @@
         <button onclick="join_public();">Join Public Game</button>
         <button onclick="create_private();">Create Private Game</button>
         <button onclick="join_private();">Join Private Game</button>
+        <div onmouseover="mOver(this)" onmouseout="mOut(this)" 
+        style="font-size: 20px; padding-top:50px; padding-bottom:50px;">Credit</div>
     </div>
 </body>
