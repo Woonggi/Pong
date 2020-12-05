@@ -5,6 +5,7 @@
     <title>Lobby</title>
     <style>
         .center-contents {
+            font-family :'Courier New';
             text-align: center;
         }
         .username_input {
@@ -87,17 +88,19 @@
         }
 
         function mOver(obj) {
-            obj.style.fontSize = "30px";
+            obj.style.fontSize = "25px";
             obj.innerHTML =  " \
             Developed by Woonggi Eun <br /><br />  \
             ** DigiPen Institutue of Technology **<br /> \
             President : Claude Comair<br /> \
             Instructor: Matthew Picioccio<br /> \
+            <br /> \<br /> \<br /> \<br /> \<br /> \<br /> \<br /> \<br /> \
+            *** All copyright and other rights in such is owned by DigiPen ***\
             "
         }
         function mOut(obj) {
-            obj.style.fontSize = "20px"
-            obj.innerHTML = "Credit"
+            obj.style.fontSize = "30px"
+            obj.innerHTML = "* Credit *"
         }
 
     </script>
@@ -111,6 +114,6 @@
         <button onclick="create_private();">Create Private Game</button>
         <button onclick="join_private();">Join Private Game</button>
         <div onmouseover="mOver(this)" onmouseout="mOut(this)" 
-        style="font-size: 20px; padding-top:50px; padding-bottom:50px;">Credit</div>
+        style="font-size: 30px; padding-top:50px; padding-bottom:50px;">* Credit *</div>
     </div>
 </body>
