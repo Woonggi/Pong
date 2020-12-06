@@ -14,7 +14,6 @@ let username = "default";
 let room_code = "";
 app.get('/public/:username/', (req, res) => {
     res.sendFile(__dirname + '/game.html');
-    console.log("GET PUBLIC")
     username = req.params.username;
     room_code = "public";
 });
@@ -22,7 +21,6 @@ app.get('/public/:username/', (req, res) => {
 let room_codes = {}; 
 app.get('/private/:room_code/:username', (req, res) => {
     res.sendFile(__dirname + '/game.html');
-    console.log("GET PRIVATE")
     username = req.params.username;
     room_code = req.params.room_code;
 });
@@ -50,7 +48,6 @@ menu_io.on('connection', async(socket) => {
                 room_codes[room_code] = 1;
                 validate = 1;
             }
-            console.log('EMIT!');
             socket.emit('create_validation', validate, message)
         });
         // join private
