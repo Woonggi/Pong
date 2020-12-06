@@ -8,6 +8,7 @@ module.exports = class player{
         this.username = info.username;
         this.id = info.id;
         this.keypress = [];
+        this.keyonce = [];
         
         // HARD-CODED
         this.width = 20;

@@ -108,7 +108,9 @@ game_io.on('connection', (socket) => {
         if (room_manager.num_rooms > 0) {
             let user = room_manager.find_user(socket.id);
             if (user != null) {
-                room_manager.find_user(socket.id).keypress[keycode] = true;
+                if(keycode != 32) {
+                    room_manager.find_user(socket.id).keypress[keycode] = true;
+                }
             }
         }
     });
@@ -121,6 +123,20 @@ game_io.on('connection', (socket) => {
             }
         }
     });
+    
+    socket.on('space_event', (space) => {
+        if (room_manager.num_rooms > 0) {
+            let user = room_manager.find_user(socket.id);
+            const SPACE = 32;
+            if (user != null) {
+                if(space == 1) {
+                    room_manager.find_user(socket.id).keypress[SPACE] = true;
+                } else if(space == 0) {
+                    room_manager.find_user(socket.id).keypress[SPACE] = false;
+                }
+            }
+        }
+    })
 })
 
 var update = setInterval(() => {

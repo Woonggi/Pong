@@ -30,13 +30,28 @@
     let score1 = 0, score2 = 0;
     let username = [];
     
+    let space_down = false;
     // send key code to server.
     $('body').on('keydown', (e) => {
         socket.emit('keydown', e.keyCode);
+        console.log(e.keyCode);
+        if(e.keyCode == 32) {
+            let space = 0;
+            if(space_down == false) {
+                space = 1;
+                space_down = true;
+            } else {
+                space = 0; 
+            }
+            socket.emit('space_event', space)
+        }
     });
 
     $('body').on('keyup', (e) => {
         socket.emit('keyup', e.keyCode);
+        if(e.keyCode == 32) {
+            space_down = false;
+        }
     });
 
     let players = [];

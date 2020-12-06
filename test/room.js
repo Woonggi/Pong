@@ -19,6 +19,7 @@ module.exports = class room {
         this.curr_state = "ST_IDLE";
         this.id = p1.id + p2.id;
         this.io = io;
+        this.game_done = false;
 
         this.players = [];
         this.players.push(this.player1);
@@ -49,9 +50,12 @@ module.exports = class room {
                 player.to_trans.y += 7;
             }
             if(start_player.keypress[SPACE] && this.curr_state != "ST_ONGAME"
-               && this.curr_state != "ST_GAMEOVER") {
+               && this.curr_state != "ST_GAMEOVER" 
+               && (this.curr_state == "ST_LEFTBALL" || this.curr_state == "ST_RIGHTBALL" 
+               || this.curr_state == "ST_IDLE")) {
                 this.ball.vel_x = this.ball.speed;
                 this.curr_state = "ST_ONGAME"
+                start_player.keypress[SPACE] = false;
             }
             ids.push(player.id);
             status[player.id] = player.to_trans;
@@ -59,17 +63,21 @@ module.exports = class room {
 
         if((this.player1.points == config.end_point
         || this.player2.points == config.end_point)
-        && this.curr_state != "ST_GAMEOVER") {
+        && this.curr_state != "ST_GAMEOVER"
+        && this.game_done == false) {
             let winner = this.curr_state === "ST_RIGHTBALL" ? this.player1.username : this.player2.username;
             let winning_text = winner + ' Won!';
             this.curr_state = "ST_GAMEOVER";
             this.io.to(this.player1.id).emit('game_over', winning_text);
             this.io.to(this.player2.id).emit('game_over', winning_text);
+            this.game_done = true;
         }
 
-        this.curr_state = this.ball.update(this.player1, this.player2, this.curr_state, this.io);
-        this.io.to(this.player1.id).emit('update', ids, status, this.ball.to_trans);
-        this.io.to(this.player2.id).emit('update', ids, status, this.ball.to_trans);
+        if(this.game_done == false) {
+            this.curr_state = this.ball.update(this.player1, this.player2, this.curr_state, this.io);
+            this.io.to(this.player1.id).emit('update', ids, status, this.ball.to_trans);
+            this.io.to(this.player2.id).emit('update', ids, status, this.ball.to_trans);
+        }
     }
     
     disconnect(id) {

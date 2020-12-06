@@ -11,6 +11,9 @@
         .username_input {
             padding-bottom: 15px;
         }
+        #logo {
+            padding-top : 200px;
+        }
         h1 {
             font-size: 100px;
             padding-top: 50px;
@@ -101,11 +104,17 @@
             <br /><br /><br /><br /><br /><br /> \
             <small>WWW.DIGIPEN.EDU <br />\
             COPYRIGHT © 2020 BY DIGIPEN (USA), LLC. ALL RIGHTS RESERVED</small><br />\
-            "
+            ";
+            document.getElementById("logo").src = "https://teenlife.s3.amazonaws.com/media/uploads/listings/n5XLmrKJpG00.png";
+            document.getElementById("logo").width = "250";
+            document.getElementById("logo").height = "125";
         }
         function mOut(obj) {
             obj.style.fontSize = "30px"
-            obj.innerHTML = "<u><br/>Credit<u>"
+            obj.innerHTML = "<u><br/>Credit<u>";
+            document.getElementById("logo").src = "";
+            document.getElementById("logo").width = "0";
+            document.getElementById("logo").height = "0";
         }
 
     </script>
@@ -120,6 +129,6 @@
         <button onclick="join_private();">Join Private Game</button>
         <div class="credit" onmouseover="mOver(this)" onmouseout="mOut(this)" 
         style="font-size: 30px; height: 150px; margin: 0 auto;"><u><br/>Credit</u></div>
-        <img src="images/DigiPen_Logo.png">
+        <img src="" width:"200" height:"100" id="logo">
     </div>
 </body>

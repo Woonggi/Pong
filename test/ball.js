@@ -4,8 +4,8 @@ module.exports = class ball{
         this.to_trans.x = xpos;
         this.to_trans.y = ypos;
         this.speed = 15;
-        this.vel_x = this.speed;//this.speed;
-        this.vel_y = 0;//this.speed;
+        this.vel_x = this.speed;
+        this.vel_y = 0;
 
         // For testing, it is hard-coded now.
         this.side = 20;
@@ -34,23 +34,22 @@ module.exports = class ball{
             this.speed = -15;
             this.vel_x = 0;    
             this.vel_y = 0;    
-        } else if (curr_state === "ST_ONGAME") {
+        } 
+        if (curr_state === "ST_ONGAME") {
             this.to_trans.x += this.vel_x;
             this.to_trans.y += this.vel_y;
             // score condition
             if (this.to_trans.x <= 0) {
                 curr_state = "ST_LEFTBALL"
-                right_player.points += 1;
                 io.to(left_player.id).emit('score', curr_state);
                 io.to(right_player.id).emit('score', curr_state);
-                console.log(left_player.points + " : " + right_player.points);
+                right_player.points += 1;
             }
             if (this.to_trans.x > WIDTH) {
                 curr_state = "ST_RIGHTBALL"
-                left_player.points += 1;
                 io.to(left_player.id).emit('score', curr_state);
                 io.to(right_player.id).emit('score', curr_state);
-                console.log(left_player.points + " : " + right_player.points);
+                left_player.points += 1;
             }
             // proceed physics only if game is on going
             if (this.to_trans.y < 0 || this.to_trans.y + this.side > HEIGHT) {
