@@ -83,13 +83,11 @@ let room_manager = new RoomManager(game_io);
 game_io.on('connection', (socket) => {
     console.log(socket.id + " joined game");
     lobby.add_player(socket.id, username, room_code);
-    console.log(lobby.players);
 
     if(lobby.get_num_player() % 2 == 0 && lobby.get_num_player() > 0) {
-        let player1 = lobby.players.shift();
-        let player2 = lobby.players.shift();
+        let player1 = lobby.public_queue.shift();
+        let player2 = lobby.public_queue.shift();
         room_manager.create_room(player1, player2);
-        //room_manager.print_all_rooms();
     }
     if(lobby.get_num_private_players(room_code) == 2) {
         let player1 = lobby.private_players[room_code].shift();
@@ -102,6 +100,11 @@ game_io.on('connection', (socket) => {
         if(room != null) {
             room.disconnect(socket.id);
         }
+        if(room_codes[room_code] != null) {
+            delete room_codes[room_code];
+            delete lobby.private_players[room_code];
+        }
+        lobby.remove_player(socket.id);
     });
 
     socket.on('keydown', (keycode) => {
@@ -123,7 +126,7 @@ game_io.on('connection', (socket) => {
             }
         }
     });
-    
+
     socket.on('space_event', (space) => {
         if (room_manager.num_rooms > 0) {
             let user = room_manager.find_user(socket.id);

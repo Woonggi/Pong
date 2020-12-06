@@ -55,7 +55,6 @@ module.exports = class room {
                || this.curr_state == "ST_IDLE")) {
                 this.ball.vel_x = this.ball.speed;
                 this.curr_state = "ST_ONGAME"
-                start_player.keypress[SPACE] = false;
             }
             ids.push(player.id);
             status[player.id] = player.to_trans;

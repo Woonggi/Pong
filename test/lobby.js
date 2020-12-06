@@ -1,10 +1,9 @@
-const RoomManager = require('./room_manager');
-
 module.exports = class lobby {
     constructor() {
-        this.players = [];
+        this.players = {};
+        this.public_queue = [];
         this.private_players = {};
-        this.room_manager = new RoomManager();
+        this.num_player = 0;
     }
 
     add_player(id, username, room_code = "public") {
@@ -14,7 +13,9 @@ module.exports = class lobby {
             room_code: room_code
         }
         if(player.room_code === "public") {
-            this.players.push(player);
+            this.players[id] = player;
+            this.public_queue.push(player);
+            this.num_player++;
         } else {
             if(this.private_players[room_code] == null) {
                 this.private_players[room_code] = new Array();
@@ -24,15 +25,15 @@ module.exports = class lobby {
     }
 
     remove_player(id) {
-        for (var i = 0; i < this.players.length; ++i) {
-            if(id === players[i].id){
-                delete players[i];
-            }
-        }
+        if(this.players[id] != null) {
+            this.public_queue.shift();
+            delete this.players[id];
+            this.num_player--;
+        } 
     }
 
     get_num_player() {
-        return this.players.length;
+        return this.num_player;
     }
 
     get_num_private_players(code) {
