@@ -4,7 +4,6 @@ const http         = require('http').createServer(app);
 const io           = require('socket.io')(http);
 const Lobby        = require('./lobby.js')
 const RoomManager  = require('./room_manager.js')
-const token_builder = require('./token.js')
 
 app.use(express.static('/images'))
 app.get('/', (req, res) => {
