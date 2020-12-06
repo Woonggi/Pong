@@ -6,7 +6,7 @@ const Lobby        = require('./lobby.js')
 const RoomManager  = require('./room_manager.js')
 const token_builder = require('./token.js')
 
-
+app.use(express.static('/images'))
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/menu.html');
 });
