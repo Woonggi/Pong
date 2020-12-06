@@ -33,7 +33,7 @@ module.exports = class lobby {
     }
 
     get_num_player() {
-        return this.num_player;
+        return this.public_queue.length;
     }
 
     get_num_private_players(code) {

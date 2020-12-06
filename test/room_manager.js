@@ -9,7 +9,9 @@ module.exports = class room_manager {
     create_room(p1, p2) {
         let to_add = new Room(p1, p2, this.io);
         to_add.init();
+        console.log('Room Created!');
         this.rooms[to_add.id] = to_add;
+        this.rooms[to_add.id].print_room();
         this.num_rooms++;
     }
 
