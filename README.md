@@ -2,6 +2,7 @@
 Game server implementation with pong
 
 ~~The server was deployed on AWS but not it closed(due to the billing)~~
+
 Server is back! You can access to http://44.236.180.253:3000/.
 
 But you could still test locally. Clone the repository and run,
