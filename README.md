@@ -1,5 +1,5 @@
 # Pong
-Game server implementation with pong
+[Game server implementation with pong](https://www.youtube.com/watch?v=CAkqfaT20U8&t=34s&ab_channel=WoonggiEun)
 
 ~~The server was deployed on AWS but not it closed(due to the billing)~~
 
